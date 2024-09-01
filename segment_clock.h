@@ -15,6 +15,7 @@ class SegmentClock{
         void setBackgroundBrightness(uint8_t brightness);
         uint8_t getBrightnessTime();
         uint8_t getBrightnessBackground();
+        void randomizeBackground();
 
     private:
         LEDStrip *ledstrip;

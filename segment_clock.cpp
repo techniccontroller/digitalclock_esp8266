@@ -25,15 +25,6 @@ void SegmentClock::setTime(uint8_t hour, uint8_t minute)
     uint32_t scaled_color_time = scaleColor(color_time, brightness_time);
     uint32_t scaled_color_background = scaleColor(color_background, brightness_background);
     
-    // clear all pixels
-    ledstrip->flush();
-
-    // set background color_time
-    for(int i = 0; i < LED_COUNT - 30; i++)
-    {
-        ledstrip->setPixel(ids_of_background[i], color_background);
-    }
-
     // set time
     if(hour < 10)
     {
@@ -50,9 +41,6 @@ void SegmentClock::setTime(uint8_t hour, uint8_t minute)
     // set points
     ledstrip->setPixel(ids_of_points[0], scaled_color_time);
     ledstrip->setPixel(ids_of_points[1], scaled_color_time);
-
-    // set background
-    setBackground(scaled_color_background);
 }
 
 /**
@@ -101,6 +89,19 @@ uint8_t SegmentClock::getBrightnessTime()
 uint8_t SegmentClock::getBrightnessBackground()
 {
     return brightness_background;
+}
+
+/**
+ * @brief Randomize the background of the clock
+ */
+void SegmentClock::randomizeBackground()
+{
+    for(int i = 0; i < LED_COUNT - 30; i++)
+    {
+        uint8_t brightness = (random(255) / 255.0) * brightness_background;
+        uint32_t color = scaleColor(color_background, brightness);
+        ledstrip->setPixel(ids_of_background[i], color);    
+    }
 }
 
 /**

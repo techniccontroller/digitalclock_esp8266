@@ -78,6 +78,7 @@ long lastStep = millis();           // time of last clock update
 long lastLedStep = millis();  // time of last led update
 long lastNTPUpdate = millis() - (PERIOD_NTP_UPDATE-5000);  // time of last NTP update
 long lastNightmodeCheck = millis(); // time of last nightmode check
+long lastRandomBackground = millis(); // time of last random background change
 
 // Create necessary global objects
 UDPLogger logger;
@@ -208,7 +209,6 @@ void loop() {
 
   // send regularly heartbeat messages via UDP multicast
   if(millis() - lastheartbeat > PERIOD_HEARTBEAT){
-    segmentClock.logBackgroundIds();
     logger.logString("Heartbeat, FreeHeap: " + String(ESP.getFreeHeap()) 
                       + ", HeapFrag: " + String(ESP.getHeapFragmentation()) 
                       + ", MaxFreeBlock: " + String(ESP.getMaxFreeBlockSize()) + "\n");
@@ -232,8 +232,13 @@ void loop() {
   }
   // periodically write colors to leds
   else if(millis() - lastLedStep > PERIOD_LED_UPDATE){
-    ledstrip.drawOnLEDsSmooth(1.0);
+    ledstrip.drawOnLEDsSmooth(0.2);
     lastLedStep = millis();
+  }
+  
+  if(millis() - lastRandomBackground > PERIOD_BACKGROUND_RANDOM){
+    segmentClock.randomizeBackground();
+    lastRandomBackground = millis();
   }
 
   // NTP time update

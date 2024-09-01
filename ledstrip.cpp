@@ -155,7 +155,7 @@ void LEDStrip::runLEDTest()
         neopixel_leds->setPixelColor(i, neopixel_leds->Color(0, 0, 0));
         neopixel_leds->setPixelColor((i+1)%neopixel_leds->numPixels(), neopixel_leds->Color(0, 255, 0));
         neopixel_leds->show();
-        delay(100);
+        delay(10);
     }
 
     neopixel_leds->clear();
