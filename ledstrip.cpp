@@ -65,17 +65,17 @@ uint32_t LEDStrip::interpolateColor24bit(uint32_t color1, uint32_t color2, float
 }
 
 /**
- * @brief Setup the LED rings
+ * @brief Initialize the LED strip
  * 
 */
-void LEDStrip::setupRings(){
+void LEDStrip::initializeStrip(){
     neopixel_leds->begin();
     neopixel_leds->setBrightness(brightness);
     neopixel_leds->show();
 }
 
 /**
- * @brief Set the brightness of the outer ring
+ * @brief Set the brightness of the overall LED strip
  * 
  * @param brightness brightness value (0-255)
  */
@@ -85,16 +85,16 @@ void LEDStrip::setBrightness(uint8_t brightness){
 }
 
 /**
- * @brief Set the current limit of the LED rings
+ * @brief Set the current limit for the LED strip
  * 
- * @param currentLimit current limit value (0-9999)
+ * @param currentLimit current limit value (0-9999 mA)
  */
 void LEDStrip::setCurrentLimit(uint16_t currentLimit){
     this->currentLimit = currentLimit;
 }
 
 /**
- * @brief Get the brightness
+ * @brief Get the current set brightness
  * 
  * @return uint8_t brightness value (0-255)
  */
@@ -105,6 +105,7 @@ uint8_t LEDStrip::getBrightness(){
 /**
  * @brief Set all pixels to black (off)
  * 
+ * Will be shown on the LED strip after calling drawOnLEDsInstant() or drawOnLEDsSmooth()
  */
 void LEDStrip::flush(){
     for(int i=0; i<LED_COUNT; i++) {
@@ -113,7 +114,9 @@ void LEDStrip::flush(){
 }
 
 /**
- * @brief Set the color of a pixel on the outer ring
+ * @brief Set the color of a pixel on the LED strip
+ * 
+ * Will be shown on the LED strip after calling drawOnLEDsInstant() or drawOnLEDsSmooth()
  * 
  * @param pixel pixel number (0-90)
  * @param color 24bit color value
@@ -128,7 +131,7 @@ void LEDStrip::setPixel(uint16_t pixel, uint32_t color){
 }
 
 /**
- * @brief Draw the target color on the rings instantly
+ * @brief Draw the target color on the LED strip instantly
  * 
  */
 void LEDStrip::drawOnLEDsInstant(){
@@ -136,24 +139,29 @@ void LEDStrip::drawOnLEDsInstant(){
 }
 
 /**
- * @brief Draw the target color on the rings with a smooth transition
+ * @brief Draw the target color on the LED strip with a smooth transition
  * 
  * @param factor transition factor (1.0 = instant, 0.1 = smooth)
  */
 void LEDStrip::drawOnLEDsSmooth(float factor){
+    if(factor < 0.0 || factor > 1.0){
+        logger->logString("ERROR: factor out of range");
+        factor = 1.0;
+        return;
+    }
     drawOnLEDs(factor);
 }
 
 /**
  * @brief Run a quick LED test
  * 
- * Test quickly each LED
+ * Test quickly each LED, leds should light up white one after another
  */
 void LEDStrip::runLEDTest()
 {
     for(int i=0; i<neopixel_leds->numPixels(); i++) {
         neopixel_leds->setPixelColor(i, neopixel_leds->Color(0, 0, 0));
-        neopixel_leds->setPixelColor((i+1)%neopixel_leds->numPixels(), neopixel_leds->Color(0, 255, 0));
+        neopixel_leds->setPixelColor((i+1)%neopixel_leds->numPixels(), neopixel_leds->Color(128, 128, 128));
         neopixel_leds->show();
         delay(10);
     }
@@ -164,13 +172,13 @@ void LEDStrip::runLEDTest()
 }
 
 /**
- * @brief Draw the target color on the rings
+ * @brief Draw the target color on the LED strip with a smooth transition
  * 
  * @param factor transition factor (1.0 = instant, 0.1 = smooth)
  */
 void LEDStrip::drawOnLEDs(float factor){
 
-    // set pixels on outer ring and calculate current for outer ring
+    // set pixels on the led strip and calculate current
     uint16_t totalCurrent = 0;
     for(int i=0; i<LED_COUNT; i++) {
         uint32_t currentColor = current[i];
@@ -192,7 +200,6 @@ void LEDStrip::drawOnLEDs(float factor){
         neopixel_leds->setBrightness(brightness);
     }
 
-    // show rings
     neopixel_leds->show();
 }
 

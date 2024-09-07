@@ -14,7 +14,7 @@ class LEDStrip{
         static uint32_t Wheel(uint8_t WheelPos);
         static uint32_t interpolateColor24bit(uint32_t color1, uint32_t color2, float factor);
 
-        void setupRings();
+        void initializeStrip();
 
         void setBrightness(uint8_t brightness);
         void setCurrentLimit(uint16_t currentLimit);

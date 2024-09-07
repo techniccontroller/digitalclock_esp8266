@@ -97,7 +97,7 @@ To program the ESP8266 with the Arduino IDE, you need to install the board infor
 
 #### STEP3: Upload a program to ESP8266
 
-- Open ringclock_esp8266.ino in Arduino IDE
+- Open digitalclock_esp8266.ino in Arduino IDE
 - Connect ESP8266 board with Computer
 - Select right serial Port in Tools -> Port
 - Click on the upload button in the Arduino IDE to upload the program to the ESP8266 Module.     
@@ -115,7 +115,7 @@ Resetting the wifi credentials does not delete uploaded files.
 
 ## Remark about Logging
 
-The RingClock sends continuous log messages to the serial port and via multicast UDP. If you want to see these messages, you have to 
+The Clock sends continuous log messages to the serial port and via multicast UDP. If you want to see these messages, you have to 
 
 - open the serial monitor in the Arduino IDE (Tools -> Serial Monitor). The serial monitor must be set to 115200 baud.
 
@@ -123,8 +123,8 @@ OR
 
 - run the following steps for the multicast UDP logging:
 
-1. Starting situation: RingClock is connected to WLAN, a computer with installed Python (https://www.python.org/downloads/) is in the same local area network (WLAN or LAN doesn't matter).
-3. Open the file **multicastUDP_receiver.py** in a text editor and in line 81 enter the IP address of the computer (not the RingClock!).
+1. Starting situation: Clock is connected to WLAN, a computer with installed Python (https://www.python.org/downloads/) is in the same local area network (WLAN or LAN doesn't matter).
+3. Open the file **multicastUDP_receiver.py** in a text editor and in line 81 enter the IP address of the computer (not the clock!).
 ```python	
 # ip address of network interface
 MCAST_IF_IP = '192.168.0.7'
@@ -135,8 +135,8 @@ MCAST_IF_IP = '192.168.0.7'
 python multicastUDP_receiver_analyzer.py
 ```
 
-5. Now you should see the log messages of the RingClock (every 5 seconds a heartbeat message and the currently displayed time). 
+5. Now you should see the log messages of the clock (every 5 seconds a heartbeat message and the currently displayed time). 
 If this is not the case, there could be a problem with the network settings of the computer, then recording is unfortunately not possible.
 
-6. If special events (failed NTP update, reboot) occur, a section of the log is saved in a file called *log.txt*. 
+6. If special events (failed NTP update, reboot) occure, a section of the log is saved in a file called *log.txt*. 
 In principle, the events are not critical and will occur from time to time, but should not be too frequent.

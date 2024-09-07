@@ -119,7 +119,7 @@ void setup() {
 
   
 
-  ledstrip.setupRings();
+  ledstrip.initializeStrip();
   ledstrip.setCurrentLimit(CURRENT_LIMIT_LED);
 
   loadColorsFromEEPROM();
