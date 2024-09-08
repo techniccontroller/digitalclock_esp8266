@@ -169,7 +169,7 @@ void setup() {
   logger.logString("IP: " + WiFi.localIP().toString());
   logger.logString("Reset Reason: " + ESP.getResetReason());
 
-  if(!ESP.getResetReason().equals("Software/System restart")){
+  if(ESP.getResetReason().equals("Power On") || ESP.getResetReason().equals("External System")){
     ledstrip.runLEDTest();
 
     // display IP
