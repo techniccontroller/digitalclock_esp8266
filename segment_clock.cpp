@@ -22,21 +22,21 @@ SegmentClock::SegmentClock(LEDStrip *ledstrip, UDPLogger *logger)
  */
 void SegmentClock::setTime(uint8_t hour, uint8_t minute)
 {
+    clearTempBackground();
     uint32_t scaled_color_time = scaleColor(color_time, brightness_time);
-    uint32_t scaled_color_background = scaleColor(color_background, brightness_background);
     
     // set time
     if(hour < 10)
     {
-        setSegment(ids_of_first_segment, 8, scaled_color_background, scaled_color_background);
+        setSegment(ids_of_first_segment, NO_DIGIT, scaled_color_time);
     }
     else
     {
-        setSegment(ids_of_first_segment, hour/10, scaled_color_time, scaled_color_background);
+        setSegment(ids_of_first_segment, hour/10, scaled_color_time);
     }
-    setSegment(ids_of_second_segment, hour%10, scaled_color_time, scaled_color_background);
-    setSegment(ids_of_third_segment, minute/10, scaled_color_time, scaled_color_background);
-    setSegment(ids_of_fourth_segment, minute%10, scaled_color_time, scaled_color_background);
+    setSegment(ids_of_second_segment, hour%10, scaled_color_time);
+    setSegment(ids_of_third_segment, minute/10, scaled_color_time);
+    setSegment(ids_of_fourth_segment, minute%10, scaled_color_time);
 
     // set points
     ledstrip->setPixel(ids_of_points[0], scaled_color_time);
@@ -102,6 +102,13 @@ void SegmentClock::randomizeBackground()
         uint32_t color = scaleColor(color_background, brightness);
         ledstrip->setPixel(ids_of_background[i], color);    
     }
+
+    for(int i = 0; i < num_temp_background_leds; i++)
+    {
+        uint8_t brightness = (random(255) / 255.0) * brightness_background;
+        uint32_t color = scaleColor(color_background, brightness);
+        ledstrip->setPixel(ids_of_background_temp[i], color);
+    }
 }
 
 /**
@@ -153,7 +160,7 @@ void SegmentClock::calcBackgroundIds()
  * @param color_time color of the segment
  * @param color_background color of the background
  */
-void SegmentClock::setSegment(uint8_t *segment_ids, uint8_t digit, uint32_t color_time, uint32_t color_background)
+void SegmentClock::setSegment(const uint8_t *segment_ids, uint8_t digit, uint32_t color_time)
 {
     switch (digit)
     {
@@ -164,26 +171,26 @@ void SegmentClock::setSegment(uint8_t *segment_ids, uint8_t digit, uint32_t colo
         ledstrip->setPixel(segment_ids[3], color_time);
         ledstrip->setPixel(segment_ids[4], color_time);
         ledstrip->setPixel(segment_ids[5], color_time);
-        ledstrip->setPixel(segment_ids[6], color_background);
+        addTempBackground(segment_ids[6]);
         break;
 
     case 1:
-        ledstrip->setPixel(segment_ids[0], color_background);
+        addTempBackground(segment_ids[0]);
         ledstrip->setPixel(segment_ids[1], color_time);
         ledstrip->setPixel(segment_ids[2], color_time);
-        ledstrip->setPixel(segment_ids[3], color_background);
-        ledstrip->setPixel(segment_ids[4], color_background);
-        ledstrip->setPixel(segment_ids[5], color_background);
-        ledstrip->setPixel(segment_ids[6], color_background);
+        addTempBackground(segment_ids[3]);
+        addTempBackground(segment_ids[4]);
+        addTempBackground(segment_ids[5]);
+        addTempBackground(segment_ids[6]);
         break;
     
     case 2:
         ledstrip->setPixel(segment_ids[0], color_time);
         ledstrip->setPixel(segment_ids[1], color_time);
-        ledstrip->setPixel(segment_ids[2], color_background);
+        addTempBackground(segment_ids[2]);
         ledstrip->setPixel(segment_ids[3], color_time);
         ledstrip->setPixel(segment_ids[4], color_time);
-        ledstrip->setPixel(segment_ids[5], color_background);
+        addTempBackground(segment_ids[5]);
         ledstrip->setPixel(segment_ids[6], color_time);
         break;
 
@@ -192,34 +199,34 @@ void SegmentClock::setSegment(uint8_t *segment_ids, uint8_t digit, uint32_t colo
         ledstrip->setPixel(segment_ids[1], color_time);
         ledstrip->setPixel(segment_ids[2], color_time);
         ledstrip->setPixel(segment_ids[3], color_time);
-        ledstrip->setPixel(segment_ids[4], color_background);
-        ledstrip->setPixel(segment_ids[5], color_background);
+        addTempBackground(segment_ids[4]);
+        addTempBackground(segment_ids[5]);
         ledstrip->setPixel(segment_ids[6], color_time);
         break;
     
     case 4:
-        ledstrip->setPixel(segment_ids[0], color_background);
+        addTempBackground(segment_ids[0]);
         ledstrip->setPixel(segment_ids[1], color_time);
         ledstrip->setPixel(segment_ids[2], color_time);
-        ledstrip->setPixel(segment_ids[3], color_background);
-        ledstrip->setPixel(segment_ids[4], color_background);
+        addTempBackground(segment_ids[3]);
+        addTempBackground(segment_ids[4]);
         ledstrip->setPixel(segment_ids[5], color_time);
         ledstrip->setPixel(segment_ids[6], color_time);
         break;
     
     case 5:
         ledstrip->setPixel(segment_ids[0], color_time);
-        ledstrip->setPixel(segment_ids[1], color_background);
+        addTempBackground(segment_ids[1]);
         ledstrip->setPixel(segment_ids[2], color_time);
         ledstrip->setPixel(segment_ids[3], color_time);
-        ledstrip->setPixel(segment_ids[4], color_background);
+        addTempBackground(segment_ids[4]);
         ledstrip->setPixel(segment_ids[5], color_time);
         ledstrip->setPixel(segment_ids[6], color_time);
         break;
     
     case 6:
         ledstrip->setPixel(segment_ids[0], color_time);
-        ledstrip->setPixel(segment_ids[1], color_background);
+        addTempBackground(segment_ids[1]);
         ledstrip->setPixel(segment_ids[2], color_time);
         ledstrip->setPixel(segment_ids[3], color_time);
         ledstrip->setPixel(segment_ids[4], color_time);
@@ -231,10 +238,10 @@ void SegmentClock::setSegment(uint8_t *segment_ids, uint8_t digit, uint32_t colo
         ledstrip->setPixel(segment_ids[0], color_time);
         ledstrip->setPixel(segment_ids[1], color_time);
         ledstrip->setPixel(segment_ids[2], color_time);
-        ledstrip->setPixel(segment_ids[3], color_background);
-        ledstrip->setPixel(segment_ids[4], color_background);
-        ledstrip->setPixel(segment_ids[5], color_background);
-        ledstrip->setPixel(segment_ids[6], color_background);
+        addTempBackground(segment_ids[3]);
+        addTempBackground(segment_ids[4]);
+        addTempBackground(segment_ids[5]);
+        addTempBackground(segment_ids[6]);
         break;
 
     case 8:
@@ -252,9 +259,19 @@ void SegmentClock::setSegment(uint8_t *segment_ids, uint8_t digit, uint32_t colo
         ledstrip->setPixel(segment_ids[1], color_time);
         ledstrip->setPixel(segment_ids[2], color_time);
         ledstrip->setPixel(segment_ids[3], color_time);
-        ledstrip->setPixel(segment_ids[4], color_background);
+        addTempBackground(segment_ids[4]);
         ledstrip->setPixel(segment_ids[5], color_time);
         ledstrip->setPixel(segment_ids[6], color_time);
+        break;
+    
+    case NO_DIGIT:
+        addTempBackground(segment_ids[0]);
+        addTempBackground(segment_ids[1]);
+        addTempBackground(segment_ids[2]);
+        addTempBackground(segment_ids[3]);
+        addTempBackground(segment_ids[4]);
+        addTempBackground(segment_ids[5]);
+        addTempBackground(segment_ids[6]);
         break;
     
     default:
@@ -292,4 +309,15 @@ uint32_t SegmentClock::scaleColor(uint32_t color, uint8_t brightness)
     blue = blue * brightness / 255;
 
     return LEDStrip::Color24bit(red, green, blue);
+}
+
+void SegmentClock::clearTempBackground()
+{
+    num_temp_background_leds = 0;
+}
+
+void SegmentClock::addTempBackground(uint8_t id)
+{
+    ids_of_background_temp[num_temp_background_leds] = id;
+    num_temp_background_leds++;
 }
