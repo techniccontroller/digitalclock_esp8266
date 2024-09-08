@@ -311,11 +311,19 @@ uint32_t SegmentClock::scaleColor(uint32_t color, uint8_t brightness)
     return LEDStrip::Color24bit(red, green, blue);
 }
 
+/**
+ * @brief Clear the the array of temporary background pixels
+ */
 void SegmentClock::clearTempBackground()
 {
     num_temp_background_leds = 0;
 }
 
+/**
+ * @brief Add a temporary background pixel to the array
+ * 
+ * @param id id of the pixel
+ */
 void SegmentClock::addTempBackground(uint8_t id)
 {
     ids_of_background_temp[num_temp_background_leds] = id;
