@@ -102,6 +102,8 @@ uint8_t nightModeEndMin = 0;
 // Watchdog counter to trigger restart if NTP update was not possible 30 times in a row (5min)
 int watchdogCounter = 30;
 
+bool waitForTimeAfterReboot = false; // wait for time update after reboot
+
 // ----------------------------------------------------------------------------------
 //                                       SETUP 
 // ----------------------------------------------------------------------------------
@@ -186,6 +188,9 @@ void setup() {
     ledstrip.flush();
     ledstrip.drawOnLEDsInstant();
   }
+  else {
+    waitForTimeAfterReboot = true;
+  }
 
   delay(2000);
 
@@ -226,12 +231,12 @@ void loop() {
   }
 
   // Turn off LEDs if ledOff is true or nightmode is active
-  if(ledOff || nightMode){
+  if(ledOff || nightMode && !waitForTimeAfterReboot){
     ledstrip.flush();
     ledstrip.drawOnLEDsInstant();
   }
   // periodically write colors to leds
-  else if(millis() - lastLedStep > PERIOD_LED_UPDATE){
+  else if(millis() - lastLedStep > PERIOD_LED_UPDATE && !waitForTimeAfterReboot){
     ledstrip.drawOnLEDsSmooth(0.2);
     lastLedStep = millis();
   }
@@ -254,6 +259,7 @@ void loop() {
       logger.logString("Summertime: " + String(ntp.updateSWChange()));
       lastNTPUpdate = millis();
       watchdogCounter = 30;
+      waitForTimeAfterReboot = false;
     }
     else if(res == -1){
       logger.logString("NTP-Update not successful. Reason: Timeout");
@@ -286,7 +292,8 @@ void loop() {
   }
 
   // check if nightmode need to be activated
-  if(millis() - lastNightmodeCheck > PERIOD_NIGHTMODE_CHECK){
+  if(millis() - lastNightmodeCheck > PERIOD_NIGHTMODE_CHECK && !waitForTimeAfterReboot){
+    logger.logString("Check nightmode");
     int hours = ntp.getHours24();
     int minutes = ntp.getMinutes();
 
@@ -300,10 +307,12 @@ void loop() {
     if (startInMinutes < endInMinutes) { // Same day scenario
         if (startInMinutes < currentTimeInMinutes && currentTimeInMinutes < endInMinutes) {
             nightMode = true;
+            logger.logString("Nightmode activated");
         }
     } else if (startInMinutes > endInMinutes) { // Overnight scenario
         if (currentTimeInMinutes > startInMinutes || currentTimeInMinutes < endInMinutes) {
             nightMode = true;
+            logger.logString("Nightmode activated");
         }
     } 
     
