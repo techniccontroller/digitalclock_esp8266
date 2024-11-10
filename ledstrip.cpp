@@ -71,7 +71,6 @@ uint32_t LEDStrip::interpolateColor24bit(uint32_t color1, uint32_t color2, float
 void LEDStrip::initializeStrip(){
     neopixel_leds->begin();
     neopixel_leds->setBrightness(brightness);
-    neopixel_leds->show();
 }
 
 /**

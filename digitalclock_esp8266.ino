@@ -124,9 +124,7 @@ void setup() {
   ledstrip.initializeStrip();
   ledstrip.setCurrentLimit(CURRENT_LIMIT_LED);
 
-  loadColorsFromEEPROM();
-  loadNightmodeSettingsFromEEPROM();
-  loadBrightnessSettingsFromEEPROM();
+
 
   /** Use WiFiMaanger for handling initial Wifi setup **/
 
@@ -170,6 +168,10 @@ void setup() {
   logger.logString("Build: " + String(__TIMESTAMP__));
   logger.logString("IP: " + WiFi.localIP().toString());
   logger.logString("Reset Reason: " + ESP.getResetReason());
+
+  loadColorsFromEEPROM();
+  loadNightmodeSettingsFromEEPROM();
+  loadBrightnessSettingsFromEEPROM();
 
   if(ESP.getResetReason().equals("Power On") || ESP.getResetReason().equals("External System")){
     ledstrip.runLEDTest();
@@ -222,16 +224,12 @@ void loop() {
 
   if((millis() - lastStep > PERIOD_CLOCK_UPDATE) && !nightMode && !ledOff){
     // update LEDs
-    int hours = ntp.getHours24();
-    int minutes = ntp.getMinutes();
-    segmentClock.setTimeColor(colorTime);
-    segmentClock.setBackgroundColor(colorBackground);
-    segmentClock.setTime(hours, minutes);
+    updateClock();
     lastStep = millis();
   }
 
   // Turn off LEDs if ledOff is true or nightmode is active
-  if(ledOff || nightMode && !waitForTimeAfterReboot){
+  if((ledOff || nightMode) && !waitForTimeAfterReboot){
     ledstrip.flush();
     ledstrip.drawOnLEDsInstant();
   }
@@ -259,6 +257,11 @@ void loop() {
       logger.logString("Summertime: " + String(ntp.updateSWChange()));
       lastNTPUpdate = millis();
       watchdogCounter = 30;
+      checkNightmode();
+      if(waitForTimeAfterReboot && !nightMode){
+        updateClock();
+        ledstrip.drawOnLEDsInstant();
+      }
       waitForTimeAfterReboot = false;
     }
     else if(res == -1){
@@ -293,29 +296,7 @@ void loop() {
 
   // check if nightmode need to be activated
   if(millis() - lastNightmodeCheck > PERIOD_NIGHTMODE_CHECK && !waitForTimeAfterReboot){
-    logger.logString("Check nightmode");
-    int hours = ntp.getHours24();
-    int minutes = ntp.getMinutes();
-
-    nightMode = false; // Initial assumption
-
-    // Convert all times to minutes for easier comparison
-    int currentTimeInMinutes = hours * 60 + minutes;
-    int startInMinutes = nightModeStartHour * 60 + nightModeStartMin;
-    int endInMinutes = nightModeEndHour * 60 + nightModeEndMin;
-
-    if (startInMinutes < endInMinutes) { // Same day scenario
-        if (startInMinutes < currentTimeInMinutes && currentTimeInMinutes < endInMinutes) {
-            nightMode = true;
-            logger.logString("Nightmode activated");
-        }
-    } else if (startInMinutes > endInMinutes) { // Overnight scenario
-        if (currentTimeInMinutes > startInMinutes || currentTimeInMinutes < endInMinutes) {
-            nightMode = true;
-            logger.logString("Nightmode activated");
-        }
-    } 
-    
+    checkNightmode(); 
     lastNightmodeCheck = millis();
   }
 
@@ -324,6 +305,45 @@ void loop() {
 // ----------------------------------------------------------------------------------
 //                                       FUNCTIONS
 // ----------------------------------------------------------------------------------
+
+/**
+ * @brief Clock update
+*/
+void updateClock(){
+  int hours = ntp.getHours24();
+  int minutes = ntp.getMinutes();
+  segmentClock.setTimeColor(colorTime);
+  segmentClock.setBackgroundColor(colorBackground);
+  segmentClock.setTime(hours, minutes);
+}
+
+/**
+ * @brief Check if nightmode should be activated
+ */
+void checkNightmode(){
+  logger.logString("Check nightmode");
+  int hours = ntp.getHours24();
+  int minutes = ntp.getMinutes();
+
+  nightMode = false; // Initial assumption
+
+  // Convert all times to minutes for easier comparison
+  int currentTimeInMinutes = hours * 60 + minutes;
+  int startInMinutes = nightModeStartHour * 60 + nightModeStartMin;
+  int endInMinutes = nightModeEndHour * 60 + nightModeEndMin;
+
+  if (startInMinutes < endInMinutes) { // Same day scenario
+      if (startInMinutes < currentTimeInMinutes && currentTimeInMinutes < endInMinutes) {
+          nightMode = true;
+          logger.logString("Nightmode activated");
+      }
+  } else if (startInMinutes > endInMinutes) { // Overnight scenario
+      if (currentTimeInMinutes >= startInMinutes || currentTimeInMinutes < endInMinutes) {
+          nightMode = true;
+          logger.logString("Nightmode activated");
+      }
+  }
+}
 
 /**
  * @brief Load the colors for hours, minutes and seconds from EEPROM
@@ -429,9 +449,8 @@ void setColorBackround(uint8_t red, uint8_t green, uint8_t blue){
 void handleCommand() {
   // receive command and handle accordingly
   for (uint8_t i = 0; i < server.args(); i++) {
-    Serial.print(server.argName(i));
-    Serial.print(F(": "));
-    Serial.println(server.arg(i));
+    String log_str = "Command received: " + server.argName(i) + " " + server.arg(i);
+    logger.logString(log_str);
   }
   
   if (server.argName(0) == "col_time") // the parameter which was sent to this server is the color for time
@@ -485,6 +504,7 @@ void handleCommand() {
     EEPROM.write(ADR_NM_END_M, nightModeEndMin);
     EEPROM.write(ADR_BRIGHTNESS_TIME, brightnessTime);
     EEPROM.write(ADR_BRIGHTNESS_BACKGROUND, brightnessBackground);
+    EEPROM.commit();
     logger.logString("Nightmode starts at: " + String(nightModeStartHour) + ":" + String(nightModeStartMin));
     logger.logString("Nightmode ends at: " + String(nightModeEndHour) + ":" + String(nightModeEndMin));
     logger.logString("BrightnessTime: " + String(brightnessTime) + ", BrightnessBackground: " + String(brightnessBackground));
@@ -496,6 +516,12 @@ void handleCommand() {
     logger.logString("Reset Wifi via Webserver...");
     wifiManager.resetSettings();
     ledstrip.runLEDTest();
+  }
+  else if (server.argName(0) == "reboot"){
+    logger.logString("Reboot via Webserver...");
+    server.send(204, "text/plain", "No Content"); // this page doesn't send back content --> 204
+    delay(1000);
+    ESP.restart();
   }
   
   server.send(204, "text/plain", "No Content"); // this page doesn't send back content --> 204
@@ -531,9 +557,8 @@ String split(String s, char parser, int index) {
 void handleDataRequest() {
   // receive data request and handle accordingly
   for (uint8_t i = 0; i < server.args(); i++) {
-    Serial.print(server.argName(i));
-    Serial.print(F(": "));
-    Serial.println(server.arg(i));
+    String log_str = "Command received: " + server.argName(i) + " " + server.arg(i);
+    logger.logString(log_str);
   }
   
   if (server.argName(0) == "key") // the parameter which was sent to this server is led color
