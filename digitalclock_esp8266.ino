@@ -73,7 +73,7 @@ WiFiManager wifiManager;
 Adafruit_NeoPixel neopixel_leds(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 // timestamp variables
-long lastheartbeat = millis();      // time of last heartbeat sending
+long lastheartbeaT = millis();      // time of last heartbeat sending
 long lastStep = millis();           // time of last clock update
 long lastLedStep = millis();  // time of last led update
 long lastNTPUpdate = millis() - (PERIOD_NTP_UPDATE-5000);  // time of last NTP update
