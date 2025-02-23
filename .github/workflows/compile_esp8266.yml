@@ -1,0 +1,42 @@
+name: Compile ESP8266 Sketch
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Arduino CLI
+        run: |
+          apt install curl python3
+          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+          echo "$(pwd)/bin" >> $GITHUB_PATH
+
+      - name: Configure Arduino CLI
+        run: |
+          echo "board_manager:\n  additional_urls:\n    - http://arduino.esp8266.com/stable/package_esp8266com_index.json" > .cli-config.yml
+          arduino-cli config init --config-file .cli-config.yml
+          arduino-cli core update-index --config-file .cli-config.yml
+          arduino-cli core install esp8266:esp8266 --config-file .cli-config.yml
+
+      - name: Install Required Libraries
+        run: |
+          arduino-cli lib install "Adafruit GFX Library"
+          arduino-cli lib install "Adafruit NeoMatrix"
+          arduino-cli lib install "Adafruit NeoPixel"
+          arduino-cli lib install "WiFiManager"
+          arduino-cli lib install "Adafruit BusIO"
+
+      - name: Compile Sketch
+        run: |
+          arduino-cli compile -v --fqbn esp8266:esp8266:nodemcuv2 digitalclock_esp8266.ino
