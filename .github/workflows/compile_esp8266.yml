@@ -28,8 +28,8 @@ jobs:
             additional_urls:
               - http://arduino.esp8266.com/stable/package_esp8266com_index.json
           EOF
-          arduino-cli config init --config-file .cli-config.yml --overwrite
-          arduino-cli core update-index --config-file .cli-config.yml
+          arduino-cli config init
+          arduino-cli core update-index
           arduino-cli core install esp8266:esp8266 --config-file .cli-config.yml
 
       - name: Install Required Libraries
