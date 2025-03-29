@@ -16,12 +16,12 @@
 			Cantarell, 
 			"Helvetica Neue", 
 			sans-serif;
-		color: white;
-		background: #8ED25B;
-		background: linear-gradient(90deg, #044ef4, #333ad4, #2c37ab, #0e0549);
+		color: black;
+		/*background: linear-gradient(90deg, #ffa9a9, #64a1e0, #ffa9a9, #64a1e0);*/
+		background: white;
 		background-size: 400% 400%;
-		-webkit-animation: gradientBG 14s ease infinite forwards;
-		animation: gradientBG 14s ease infinite forwards;
+		/*-webkit-animation: gradientBG 14s ease infinite forwards;
+		animation: gradientBG 14s ease infinite forwards;*/
 		font-weight: lighter;
 	}
 	/** Animated background: Code By Webdevtrick ( https://webdevtrick.com ) **/
@@ -53,7 +53,7 @@
 	  font-weight: lighter;
 	  letter-spacing: .125rem;
 	  text-transform: uppercase;
-	  color: white;
+	  color: black;
 	  text-align: center;
 	  font-size: x-large;
 	}
@@ -65,7 +65,10 @@
 	  height:70px;
 	  color:#fff;
 	  font-weight:200;
-	  border-radius: 20px;
+	  border-top-left-radius:14px;
+	  border-top-right-radius:14px;
+	  border-bottom-left-radius:14px;
+	  border-bottom-right-radius:14px;
 	  display: flex;
 	  align-items: center;
 	  justify-content: center;
@@ -97,14 +100,22 @@
 	}
 
 	.dot {
-		border-radius: 50%;
+		border-radius: 20%;
+		display: flex;
+		justify-content: center; /* align horizontal */
+		align-items: center; /* align vertical */
+		border: 1px solid lightgray;
+	}
+
+	.dot-mode {
 		display: flex;
 		justify-content: center; /* align horizontal */
 		align-items: center; /* align vertical */
 	}
 
 	.active{
-		border: 2px solid lightgray;
+		/*border: 2px solid lightgray;*/
+		background: black;
 	}
 
 	.mode-item{
@@ -116,9 +127,9 @@
 	}
 
 	.verticalline{
-		border-top: 1px solid rgba(255, 255, 255, 0.356);
+		border-bottom: 1px solid rgba(50, 50, 50, 0.356);
     	text-align: center;
-    	color: white;
+    	color: gray;
 	}
 
 	input[type="checkbox"]{
@@ -138,7 +149,7 @@
 		position: relative;
 		margin: 0;
 		border: 2px solid #474755ab;
-		background: linear-gradient(180deg, #2d2f39ab 0%, #1f2027ab 100%);
+		background: linear-gradient(180deg, #7f84a0ab 0%, #63667cab 100%);
 		transition: all .2s ease;
 	}
 
@@ -156,11 +167,12 @@
 	}
 
 	.toggle:checked{
-		border-color: lightgray;
+		/*border-color: lightgray;*/
 	}
 
 	.toggle:checked::after{
 		transform: translatex(20px);
+		background: black;
 	}
 
 	label {
@@ -183,18 +195,17 @@
 		text-align: center;
 		font-weight: 200;
 		font-size: larger;
-		margin-bottom: 10px;
-		margin-top: 10px;
+		margin-bottom: 5px;
+	}
+
+	.hidden{
+		display: none;
 	}
 
 	.control-container{
 		display: flex;
 		flex-direction: row;
 		justify-content: center;
-	}
-
-	.hidden{
-		display: none;
 	}
 
 	.wide-button-bottom{
@@ -243,7 +254,7 @@
 	.number-container{
 		display:flex;
 		flex-direction: row;
-		justify-content: left;
+		justify-content: space-between;
 		align-items: center;
 		margin: 10px;
 	}
@@ -251,7 +262,7 @@
 	.save-button{
 		height: 30px; 
 		margin: 5px; 
-		background-color: rgba(147, 147, 158, 0.4);
+		background-color: black;
 	}
   
 	</style>
@@ -260,7 +271,7 @@
 	</head>
 
 	<body oncontextmenu="return false"> <!-- prevent opening of contextmenu --> 
-		<div class="setting-button" onclick="toggleSettings()"><img src = "./icons/settings.svg" style="height:20px"/></div>
+		<div class="setting-button" onclick="toggleSettings()"><img src = "./icons/settings.svg" style="height:20px; filter: invert(100%);"/></div>
 		
 		<h1 id="headline">DIGITALCLOCK</h1>
 		
