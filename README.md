@@ -2,7 +2,7 @@
 
 DigitalClick with Neopixel LEDs and ESP8266
 
-More details on my website: https://techniccontroller.com/
+More details on my website: https://techniccontroller.com/diy-digitalclock-with-neopixel-led-and-esp8266/ 
 
 
 ## Features
@@ -14,25 +14,27 @@ More details on my website: https://techniccontroller.com/
 - night mode is configurable (start and end time)
 - brightness of LEDs is adjustable
 - an automatic current limiting of LEDs protects the power supply
+- automatic timezone setting
 
 ## Pictures of clock
 
-<!-- 
-| ![](https://techniccontroller.com/wp-content/uploads/ringclock_6-1024x1024.webp) | ![](https://techniccontroller.com/wp-content/uploads/ringclock_5-1024x1024.webp) | ![](https://techniccontroller.com/wp-content/uploads/ringclock_1-1024x1024.webp) |
+
+| ![](https://techniccontroller.com/wp-content/uploads/IMG_20250222_194337_crop_500px.webp) | ![](https://techniccontroller.com/wp-content/uploads/IMG_20240908_165214_crop_500px.webp) | ![](https://techniccontroller.com/wp-content/uploads/IMG_20240908_204507_crop_500px.webp) |
 |-|-|-|
--->
+
 
 ## Screenshots of webserver UI
 
-<!--
-![screenshots_UI](https://techniccontroller.com/wp-content/uploads/weboberflache_RINGCLOCK_en.png)
--->
+
+![screenshots_UI](https://techniccontroller.com/wp-content/uploads/weboberflache_DIGITALCLOCK_1-2-png.webp)
+![screenshots_UI](https://techniccontroller.com/wp-content/uploads/weboberflache_DIGITALCLOCK_2-2-png.webp)
+
 
 ## Quickstart
 
 1. Clone the project into the sketch folder of the Arduino IDE, 
 2. Install the additional libraries and upload the program to the ESP8266 as usual (See section [*Upload program to ESP8266*](https://github.com/techniccontroller/ringclock_esp8266/blob/main/README.md#upload-program-to-esp8266-with-arduino-ide) below). 
-3. The implemented WiFiManager helps you to set up a WiFi connection with your home WiFi -> on the first startup it will create a WiFi access point named "RingclockAP". Connect your phone to this access point and follow the steps which will be shown to you. 
+3. The implemented WiFiManager helps you to set up a WiFi connection with your home WiFi -> on the first startup it will create a WiFi access point named "DigitialClockAP". Connect your phone to this access point and follow the steps which will be shown to you. 
 4. After a successful WiFi setup, open the browser and enter the IP address of your ESP8266 to access the interface of the webserver. 
 5. Here you can upload all files located in the folder "data". Please make sure all icons stay in the folder "icons" also on the webserver.
     - Open **http://\<ip-address\>/fs.html** in a browser
@@ -132,7 +134,7 @@ MCAST_IF_IP = '192.168.0.7'
 4. Execute the script with following command: 
 
 ```bash
-python multicastUDP_receiver_analyzer.py
+python multicastUDP_receiver.py
 ```
 
 5. Now you should see the log messages of the clock (every 5 seconds a heartbeat message and the currently displayed time). 
