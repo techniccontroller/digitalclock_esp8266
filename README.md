@@ -26,8 +26,7 @@ More details on my website: https://techniccontroller.com/diy-digitalclock-with-
 ## Screenshots of webserver UI
 
 
-![screenshots_UI](https://techniccontroller.com/wp-content/uploads/weboberflache_DIGITALCLOCK_1-2-png.webp)
-![screenshots_UI](https://techniccontroller.com/wp-content/uploads/weboberflache_DIGITALCLOCK_2-2-png.webp)
+![screenshots_UI](https://techniccontroller.com/wp-content/uploads/weboberflache_DIGITALCLOCK_12-png.webp)
 
 
 ## Quickstart
