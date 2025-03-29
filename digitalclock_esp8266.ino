@@ -1,7 +1,7 @@
 /**
  * Digitalclock - Clock with 7-segment digitis based on NeoPixel with ESP8266 and NTP time update
  * 
- * created by techniccontroller 01.09.2024
+ * created by techniccontroller 29.03.2025
  * 
  * components:
  * - ESP8266 (Wemos D1 mini)
@@ -57,6 +57,8 @@ const char* AP_SSID = "digitalclockAP";
 // hostname
 const String hostname = "digitalclock";
 
+int utcOffset = 60; // UTC offset in minutes
+
 // ----------------------------------------------------------------------------------
 //                                        GLOBAL VARIABLES
 // ----------------------------------------------------------------------------------
@@ -83,7 +85,7 @@ long lastRandomBackground = millis(); // time of last random background change
 // Create necessary global objects
 UDPLogger logger;
 WiFiUDP NTPUDP;
-NTPClientPlus ntp = NTPClientPlus(NTPUDP, "pool.ntp.org", 1, true);
+NTPClientPlus ntp = NTPClientPlus(NTPUDP, "pool.ntp.org", utcOffset, true);
 LEDStrip ledstrip = LEDStrip(&neopixel_leds, &logger);
 SegmentClock segmentClock = SegmentClock(&ledstrip, &logger);
 
@@ -197,10 +199,10 @@ void setup() {
   delay(2000);
 
   // setup NTP
+  updateUTCOffsetFromTimezoneAPI(logger, ntp);
   ntp.setupNTPClient();
   logger.logString("NTP running");
   logger.logString("Time: " +  ntp.getFormattedTime());
-  logger.logString("TimeOffset (seconds): " + String(ntp.getTimeOffset()));
 }
 
 // ----------------------------------------------------------------------------------
@@ -253,7 +255,6 @@ void loop() {
       logger.logString("Time: " +  ntp.getFormattedTime());
       logger.logString("Date: " +  ntp.getFormattedDate());
       logger.logString("Day of Week (Mon=1, Sun=7): " +  String(ntp.getDayOfWeek()));
-      logger.logString("TimeOffset (seconds): " + String(ntp.getTimeOffset()));
       logger.logString("Summertime: " + String(ntp.updateSWChange()));
       lastNTPUpdate = millis();
       watchdogCounter = 30;
@@ -274,7 +275,6 @@ void loop() {
       logger.logString("Time: " +  ntp.getFormattedTime());
       logger.logString("Date: " +  ntp.getFormattedDate());
       logger.logString("Day of Week (Mon=1, Sun=7): " +  ntp.getDayOfWeek());
-      logger.logString("TimeOffset (seconds): " + String(ntp.getTimeOffset()));
       logger.logString("Summertime: " + String(ntp.updateSWChange()));
       lastNTPUpdate += 10000;
       watchdogCounter--;
