@@ -247,7 +247,7 @@
 	}
 
 	.show{
-		height: 240px;
+		height: 270px;
 		transition: height 1s;
 	}
 
@@ -285,7 +285,11 @@
 				<input type="range" id="brightnessBackground" name="volume" min="10" max="255">
 			</div>
 			<div class="number-container">
-				<label for="nm_start" style="align-self: flex-start">Nachtmodus Startzeit: </label> 
+				<label for="speedBackground">Hintergrund Geschw.:</label>
+				<input type="range" id="speedBackground" name="volume" min="0.2" max="5" step="0.1">
+			</div>
+			<div class="number-container">
+				<label for="nm_start" style="align-self: flex-start">Nightmode Startzeit: </label> 
 				<input type="time" id="nm_start" name="nm_start" min="00:00" max="23:59">
 			</div>
 			<div class="number-container">
@@ -447,6 +451,7 @@
 					document.getElementById("nm_end").value = myVar.nightModeEnd.replace("-", ":");
 					document.getElementById("brightnessTime").value = parseInt(myVar.brightnessTime);
 					document.getElementById("brightnessBackground").value = parseInt(myVar.brightnessBackground);
+					document.getElementById("speedBackground").value = parseFloat(myVar.speedBackground);
 
 					console.log(myVar);
 				}
@@ -465,6 +470,7 @@
 				var nmEnd = document.getElementById("nm_end");
 				var sld_brightnessTime = document.getElementById("brightnessTime");
 				var sld_brightnessBackground = document.getElementById("brightnessBackground");
+				var sld_speedBackground = document.getElementById("speedBackground");
 				var ckb_resetWifi = document.querySelector('input[id="reset_wifi"]');
 				var cmdstr = "./cmd?setting=";
 				cmdstr += nmStart.value.replace(":", "-");
@@ -474,6 +480,8 @@
 				cmdstr += sld_brightnessTime.value;
 				cmdstr += "-";
 				cmdstr += sld_brightnessBackground.value;
+				cmdstr += "-";
+				cmdstr += sld_speedBackground.value;
 				console.log(cmdstr);
 				sendCommand(cmdstr);
 				if(ckb_resetWifi.checked) {

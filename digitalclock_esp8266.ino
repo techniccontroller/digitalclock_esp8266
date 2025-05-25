@@ -241,8 +241,9 @@ void loop() {
     lastLedStep = millis();
   }
   
-  if(millis() - lastRandomBackground > PERIOD_BACKGROUND_RANDOM){
+  if(!ledOff && !nightMode && millis() - lastRandomBackground > PERIOD_BACKGROUND_RANDOM){
     segmentClock.randomizeBackground();
+    ledstrip.drawOnLEDsInstant();
     lastRandomBackground = millis();
   }
 
@@ -403,13 +404,18 @@ void loadBrightnessSettingsFromEEPROM()
 {
   uint8_t brightnessTime = EEPROM.read(ADR_BRIGHTNESS_TIME);
   uint8_t brightnessBackground = EEPROM.read(ADR_BRIGHTNESS_BACKGROUND);
+  float speedBackground = EEPROM.read(ADR_SPEED_BACKGROUND) / 100.0; // read speed as percentage
   if (brightnessTime < 10)
     brightnessTime = 10;
   if (brightnessBackground < 10)
     brightnessBackground = 10;
+  if (speedBackground < 0.2)
+    speedBackground = 0.2; // set minimum speed to 0.2
   segmentClock.setTimeBrightness(brightnessTime);
   segmentClock.setBackgroundBrightness(brightnessBackground);
-  logger.logString("BrightnessTime: " + String(brightnessTime) + ", BrightnessBackround: " + String(brightnessBackground));
+  segmentClock.setBackgroundAnimationSpeed(speedBackground);
+  logger.logString("BrightnessTime: " + String(brightnessTime) + ", BrightnessBackround: " + String(brightnessBackground)
+                   + ", SpeedBackground: " + String(speedBackground));
 }
 
 /**
@@ -492,24 +498,29 @@ void handleCommand() {
     nightModeEndMin = split(timestr, '-', 3).toInt();
     uint8_t brightnessTime = split(timestr, '-', 4).toInt();
     uint8_t brightnessBackground = split(timestr, '-', 5).toInt();
+    float speedBackground = split(timestr, '-', 6).toFloat();
     if(nightModeStartHour > 23) nightModeStartHour = 22; // set default
     if(nightModeStartMin > 59) nightModeStartMin = 0;
     if(nightModeEndHour > 23) nightModeEndHour = 7; // set default
     if(nightModeEndMin > 59) nightModeEndMin = 0;
     if(brightnessTime < 10) brightnessTime = 10;
     if(brightnessBackground < 10) brightnessBackground = 10;
+    if(speedBackground < 0.2) speedBackground = 0.2; // set minimum speed
     EEPROM.write(ADR_NM_START_H, nightModeStartHour);
     EEPROM.write(ADR_NM_START_M, nightModeStartMin);
     EEPROM.write(ADR_NM_END_H, nightModeEndHour);
     EEPROM.write(ADR_NM_END_M, nightModeEndMin);
     EEPROM.write(ADR_BRIGHTNESS_TIME, brightnessTime);
     EEPROM.write(ADR_BRIGHTNESS_BACKGROUND, brightnessBackground);
+    EEPROM.write(ADR_SPEED_BACKGROUND, (uint8_t)(speedBackground * 100)); // store speed as percentage
     EEPROM.commit();
     logger.logString("Nightmode starts at: " + String(nightModeStartHour) + ":" + String(nightModeStartMin));
     logger.logString("Nightmode ends at: " + String(nightModeEndHour) + ":" + String(nightModeEndMin));
     logger.logString("BrightnessTime: " + String(brightnessTime) + ", BrightnessBackground: " + String(brightnessBackground));
+    logger.logString("SpeedBackground: " + String(speedBackground));
     segmentClock.setTimeBrightness(brightnessTime);
     segmentClock.setBackgroundBrightness(brightnessBackground);
+    segmentClock.setBackgroundAnimationSpeed(speedBackground);
     lastNightmodeCheck = 0;
   }
   else if (server.argName(0) == "resetwifi"){
@@ -577,6 +588,8 @@ void handleDataRequest() {
       message += "\"brightnessTime\":\"" + String(segmentClock.getBrightnessTime()) + "\"";
       message += ",";
       message += "\"brightnessBackground\":\"" + String(segmentClock.getBrightnessBackground()) + "\"";
+      message += ",";
+      message += "\"speedBackground\":\"" + String(segmentClock.getBackgroundAnimationSpeed()) + "\"";
     }
     message += "}";
     logger.logString(message);
