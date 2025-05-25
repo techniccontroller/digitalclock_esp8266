@@ -12,6 +12,15 @@ SegmentClock::SegmentClock(LEDStrip *ledstrip, UDPLogger *logger)
     this->ledstrip = ledstrip;
     this->logger = logger;
     calcBackgroundIds();
+
+    speeds = new float[LED_COUNT];
+    phases = new float[LED_COUNT];
+
+    for (int i = 0; i < LED_COUNT; i++)
+    {
+        speeds[i] = 0.5 + random(100) / 100.0;  // Speeds between 0.5 and 1.5
+        phases[i] = random(0, 628) / 100.0;     // Phase offset between 0 and 2π
+    }
 }
 
 /**
@@ -76,6 +85,16 @@ void SegmentClock::setBackgroundBrightness(uint8_t brightness)
 }
 
 /**
+ * @brief Set the speed of the background animation
+ * 
+ * @param speed speed of the background animation
+ */
+void SegmentClock::setBackgroundAnimationSpeed(float speed)
+{
+    this->animation_speed = speed;
+}
+
+/**
  * @brief Get the brightness of the time
  */
 uint8_t SegmentClock::getBrightnessTime()
@@ -92,20 +111,35 @@ uint8_t SegmentClock::getBrightnessBackground()
 }
 
 /**
+ * @brief Get the speed of the background animation
+ */
+float SegmentClock::getBackgroundAnimationSpeed()
+{
+    return animation_speed;
+}
+
+/**
  * @brief Randomize the background of the clock
  */
 void SegmentClock::randomizeBackground()
 {
-    for(int i = 0; i < LED_COUNT - 30; i++)
-    {
-        uint8_t brightness = (random(255) / 255.0) * brightness_background;
-        uint32_t color = scaleColor(color_background, brightness);
-        ledstrip->setPixel(ids_of_background[i], color);    
-    }
+    background_time += 0.02 * animation_speed;
 
-    for(int i = 0; i < num_temp_background_leds; i++)
+    for (int i = 0; i < num_background_leds; i++)
     {
-        uint8_t brightness = (random(255) / 255.0) * brightness_background;
+        // Smooth brightness using sine wave animation
+        float brightnessFactor = (sin(background_time * speeds[ids_of_background[i]] + phases[ids_of_background[i]]) + 1.0) / 2.0;
+        uint8_t brightness = brightnessFactor * brightness_background;
+
+        uint32_t color = scaleColor(color_background, brightness);
+        ledstrip->setPixel(ids_of_background[i], color);
+    }
+    for (int i = 0; i < num_temp_background_leds; i++)
+    {
+        // Smooth brightness using sine wave animation
+        float brightnessFactor = (sin(background_time * speeds[ids_of_background_temp[i]] + phases[ids_of_background_temp[i]]) + 1.0) / 2.0;
+        uint8_t brightness = brightnessFactor * brightness_background;
+
         uint32_t color = scaleColor(color_background, brightness);
         ledstrip->setPixel(ids_of_background_temp[i], color);
     }
